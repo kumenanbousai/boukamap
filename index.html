@@ -136,14 +136,10 @@
       color: "#fa7aab",
     };
     // GeoJSONの内容を取得
-    fetch(`./data/ooazakai.geojson`)
-      .then((response) => response.json())
-      .then((data) => {
-        // GeoJSONのレイヤー
-        L.geoJSON(data, {
-          style: geoJsonStyle,
-        }).addTo(map);
-      });
+    // GeoJSONのレイヤー
+    L.geoJSON("./data/ooazakai.geojson", {
+      style: geoJsonStyle,
+    }).addTo(map);
     window.onload = loadData;
     
     // 現在地ボタンの機能
