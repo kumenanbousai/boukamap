@@ -1,164 +1,160 @@
 <!DOCTYPE html>
 <html lang="ja">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fire Alert Map</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="crossorigin=""></script>
+    <style>
+      html,
+      body {
+        height: 100%;
+        margin: 0;
+        padding: 0;
+      }
+      .leaflet-container {
+        width: 100vw;
+        height: 100vh;
+      }
+      .credit {
+        position: absolute;
+        bottom: 5px;
+        right: 10px;
+        background: rgba(255, 255, 255, 0.8);
+        padding: 5px;
+        font-size: 12px;
+        border-radius: 5px;
+        z-index: 1000;
+      }
 
-<head>
-	<meta charset="UTF-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>Fire Alert Map</title>
-	<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
-	crossorigin="" />
-	<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
-	crossorigin=""></script>
-	<style>
-	html,
-	    body {
-	      height: 100%;
-	      margin: 0;
-	      padding: 0;
-	    }
-	    .leaflet-container {
-	      width: 100vw;
-	      height: 100vh;
-	    }
-	    .credit {
-	      position: absolute;
-	      bottom: 5px;
-	      right: 10px;
-	      background: rgba(255, 255, 255, 0.8);
-	      padding: 5px;
-	      font-size: 12px;
-	      border-radius: 5px;
-              z-index: 1000;
-	    }
-	
-	    /* 現在地ボタンのスタイル */
-	    .locate-btn {
-	      position: absolute;
-	      top: 10px;
-	      left: 50px;
-	      background: white;
-	      border: 2px solid #ccc;
-	      padding: 8px 12px;
-	      border-radius: 5px;
-	      cursor: pointer;
-	      font-size: 14px;
-	      z-index: 1000;
-	    }
-	</style>
-</head>
-
-<body>
-	<div id="map"></div>
-	<div class="credit">
-		出典：<a href="https://maps.gsi.go.jp/development/ichiran.html" target="_blank">国土地理院</a>
-	</div>
-	<button class="locate-btn" onclick="locateUser()">📍 現在地</button>
-
-	<script>
-	let map;
-	async function loadData() {
-		const response = await fetch(
-			'https://script.google.com/macros/s/AKfycbwwf3YhD9khvlQthsR1Db7zw_WMYiiagCmWxcKwNzXqMiw6E837QPJr5doke8lmYTrZ/exec');
-		const locations = await response.json();
-		console.log("Loaded locations:", locations);
-		map = L.map("map").setView([34.92, 133.96], 13); // 初期表示
-		// ベースマップ（標準地図）
-		const baseMapStd = L.tileLayer(
-			"https://cyberjapandata.gsi.go.jp/xyz/std/{z}/{x}/{y}.png", {
-				attribution: '&copy; <a href="https://maps.gsi.go.jp/development/ichiran.html" target="_blank">国土地理院</a>',
-			});
-		// ベースマップ（航空写真）
-		const baseMapAerial = L.tileLayer(
-			"https://cyberjapandata.gsi.go.jp/xyz/seamlessphoto/{z}/{x}/{y}.jpg", {
-				attribution: '&copy; <a href="https://maps.gsi.go.jp/development/ichiran.html" target="_blank">国土地理院</a>',
-			});
-		// 初期マップとして「標準地図」を表示
-		baseMapStd.addTo(map);
-		// ベースマップ切り替えコントロール
-		const baseMaps = {
-			"白地図": baseMapStd,
-			"航空写真": baseMapAerial
-		};
-		L.control.layers(baseMaps).addTo(map);
-
-		// 🔥 火災用のカスタムアイコン
-		const fireIcon = L.icon({
-			iconUrl: "https://i.imgur.com/AkY1hP8.png", // ← ここをカスタム画像のURLに変更
-			iconSize: [32, 32], // アイコンのサイズ
-			iconAnchor: [16, 32], // アンカーの位置
-			popupAnchor: [0, -32] // ポップアップの位置調整
-		});
-		const waterTankIcon = L.icon({
-			iconUrl: "https://i.imgur.com/kO2SpqQ.png", // ← ここをカスタム画像のURLに変更
-			iconSize: [32, 32], // アイコンのサイズ
-			iconAnchor: [16, 32], // アンカーの位置
-			popupAnchor: [0, -32] // ポップアップの位置調整
-		});
-		const hydrantIcon = L.icon({
-			iconUrl: "https://i.imgur.com/gkxEqAE.png", // ← ここをカスタム画像のURLに変更
-			iconSize: [32, 32], // アイコンのサイズ
-			iconAnchor: [16, 32], // アンカーの位置
-			popupAnchor: [0, -32] // ポップアップの位置調整
-		});
-		// 火災マーカーを追加
-		if (Array.isArray(locations) && locations.length > 0) {
-			locations.forEach(loc => {
-				if (!isNaN(loc.lat) && !isNaN(loc.lng)) {
-					if (loc.key === "防火水槽") {
-						L.marker([loc.lat, loc.lng], {
-								icon: waterTankIcon
-							})
-							.addTo(map)
-							.bindPopup(loc.key)
-							.openPopup();
-					} else if (loc.key.includes("消火栓")) {
-						L.marker([loc.lat, loc.lng], {
-								icon: hydrantIcon
-							})
-							.addTo(map)
-							.bindPopup(loc.key)
-							.openPopup();
-					} else {
-						L.marker([loc.lat, loc.lng], {
-								icon: fireIcon
-							})
-							.addTo(map)
-							.bindPopup(loc.key)
-							.openPopup();
-					}
-				} else {
-					console.warn("Invalid location:", loc);
-				}
-			});
-		} else {
-			console.error("locations is not a valid array:", locations);
-		}
-	}
-	window.onload = loadData;
-		
-	// 現在地ボタンの機能
-	function locateUser() {
-		if (!navigator.geolocation) {
-			alert("Geolocation is not supported by your browser.");
-			return;
-		}
-
-		navigator.geolocation.getCurrentPosition(
-			(position) => {
-				const lat = position.coords.latitude;
-				const lng = position.coords.longitude;
-
-				map.setView([lat, lng], 14); // 現在地に移動＆ズーム
-				L.marker([lat, lng]).addTo(map)
-					.bindPopup("あなたの現在地")
-					.openPopup();
-			}, (error) => {
-				alert("現在地を取得できませんでした。");
-				console.error(error);
-			}
-		);
-	}
-	</script>
-</body>
-
+      /* 現在地ボタンのスタイル */
+      .locate-btn {
+        position: absolute;
+        top: 10px;
+        left: 50px;
+        background: white;
+        border: 2px solid #ccc;
+        padding: 8px 12px;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 14px;
+        z-index: 1000;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="map"></div>
+    <div class="credit">出典：
+      <a href="https://maps.gsi.go.jp/development/ichiran.html" target="_blank">国土地理院</a>
+    </div>
+    <button class="locate-btn" onclick="locateUser()">📍 現在地</button>
+  <script>
+    let map;
+    async function loadData() {
+      const response = await fetch(
+        'https://script.google.com/macros/s/AKfycbwwf3YhD9khvlQthsR1Db7zw_WMYiiagCmWxcKwNzXqMiw6E837QPJr5doke8lmYTrZ/exec'
+      );
+      const locations = await response.json();
+      console.log("Loaded locations:", locations);
+      map = L.map("map").setView([34.92, 133.96], 13); // 初期表示
+      // ベースマップ（標準地図）
+      const baseMapStd = L.tileLayer(
+        "https://cyberjapandata.gsi.go.jp/xyz/std/{z}/{x}/{y}.png", {
+          attribution: '&copy; <a href="https://maps.gsi.go.jp/development/ichiran.html" target="_blank">国土地理院</a>',
+        });
+      // ベースマップ（航空写真）
+      const baseMapAerial = L.tileLayer(
+        "https://cyberjapandata.gsi.go.jp/xyz/seamlessphoto/{z}/{x}/{y}.jpg", {
+          attribution: '&copy; <a href="https://maps.gsi.go.jp/development/ichiran.html" target="_blank">国土地理院</a>',
+        });
+      // 初期マップとして「標準地図」を表示
+      baseMapStd.addTo(map);
+      // ベースマップ切り替えコントロール
+      const baseMaps = {
+        "白地図": baseMapStd,
+        "航空写真": baseMapAerial
+      };
+      L.control.layers(baseMaps).addTo(map);
+    
+      // 🔥 火災用のカスタムアイコン
+      const fireIcon = L.icon({
+        iconUrl: "https://i.imgur.com/AkY1hP8.png", // ← ここをカスタム画像のURLに変更
+        iconSize: [32, 32], // アイコンのサイズ
+        iconAnchor: [16, 32], // アンカーの位置
+        popupAnchor: [0, -32] // ポップアップの位置調整
+      });
+      const waterTankIcon = L.icon({
+        iconUrl: "https://i.imgur.com/kO2SpqQ.png", // ← ここをカスタム画像のURLに変更
+        iconSize: [32, 32], // アイコンのサイズ
+        iconAnchor: [16, 32], // アンカーの位置
+        popupAnchor: [0, -32] // ポップアップの位置調整
+      });
+      const hydrantIcon = L.icon({
+        iconUrl: "https://i.imgur.com/gkxEqAE.png", // ← ここをカスタム画像のURLに変更
+        iconSize: [32, 32], // アイコンのサイズ
+        iconAnchor: [16, 32], // アンカーの位置
+        popupAnchor: [0, -32] // ポップアップの位置調整
+      });
+      // 火災マーカーを追加
+      if (Array.isArray(locations) && locations.length > 0) {
+        locations.forEach(loc => {
+          if (!isNaN(loc.lat) && !isNaN(loc.lng)) {
+            if (loc.key === "防火水槽") {
+              L.marker([loc.lat, loc.lng], {
+                  icon: waterTankIcon
+                })
+                .addTo(map)
+                .bindPopup(loc.key)
+                .openPopup();
+            } else if (loc.key.includes("消火栓")) {
+              L.marker([loc.lat, loc.lng], {
+                  icon: hydrantIcon
+                })
+                .addTo(map)
+                .bindPopup(loc.key)
+                .openPopup();
+            } else {
+              L.marker([loc.lat, loc.lng], {
+                  icon: fireIcon
+                })
+                .addTo(map)
+                .bindPopup(loc.key)
+                .openPopup();
+            }
+          } else {
+            console.warn("Invalid location:", loc);
+          }
+        });
+      } else {
+        console.error("locations is not a valid array:", locations);
+      }
+    }
+    window.onload = loadData;
+    
+    // 現在地ボタンの機能
+    function locateUser() {
+      if (!navigator.geolocation) {
+        alert("Geolocation is not supported by your browser.");
+        return;
+      }
+    
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const lat = position.coords.latitude;
+          const lng = position.coords.longitude;
+    
+          map.setView([lat, lng], 14); // 現在地に移動＆ズーム
+          L.marker([lat, lng]).addTo(map)
+            .bindPopup("あなたの現在地")
+            .openPopup();
+        }, (error) => {
+          alert("現在地を取得できませんでした。");
+          console.error(error);
+        }
+      );
+    }
+    
+  </script>
+  </body>
 </html>
