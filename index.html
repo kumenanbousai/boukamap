@@ -154,6 +154,21 @@
         }
       );
     }
+
+    // 大字界表示
+    // GeoJSONのスタイル
+    const geoJsonStyle = {
+      color: "#fa7aab",
+    };
+    // GeoJSONの内容を取得
+    fetch(`./data/ooazakai.geojson`)
+      .then((response) => response.json())
+      .then((data) => {
+        // GeoJSONのレイヤー
+        L.geoJSON(data, {
+          style: geoJsonStyle,
+        }).addTo(map);
+      });
     
   </script>
   </body>
