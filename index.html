@@ -132,8 +132,13 @@
     // 大字界表示
     // GeoJSONのスタイル
     const geoJsonStyle = {
-      color: "#fa7aab",
-      weight: "5",
+      "color": "#fa7aab",
+      "weight": 5,
+		  "opacity": 0.9,
+      "lineCap": "butt",
+  		"lineJoin": "square",
+  		"dashArray": "5 1",
+  		"dashOffset": 1,
     };
     // GeoJSONの内容を取得
     fetch(`./data/ooazakai.geojson`)
