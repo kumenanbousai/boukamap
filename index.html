@@ -130,6 +130,20 @@
         console.error("locations is not a valid array:", locations);
       }
     }
+    // 大字界表示
+    // GeoJSONのスタイル
+    const geoJsonStyle = {
+      color: "#fa7aab",
+    };
+    // GeoJSONの内容を取得
+    fetch(`./data/ooazakai.geojson`)
+      .then((response) => response.json())
+      .then((data) => {
+        // GeoJSONのレイヤー
+        L.geoJSON(data, {
+          style: geoJsonStyle,
+        }).addTo(map);
+      });
     window.onload = loadData;
     
     // 現在地ボタンの機能
@@ -153,23 +167,7 @@
           console.error(error);
         }
       );
-    }
-
-    // 大字界表示
-    // GeoJSONのスタイル
-    const geoJsonStyle = {
-      color: "#fa7aab",
-    };
-    // GeoJSONの内容を取得
-    fetch(`./data/ooazakai.geojson`)
-      .then((response) => response.json())
-      .then((data) => {
-        // GeoJSONのレイヤー
-        L.geoJSON(data, {
-          style: geoJsonStyle,
-        }).addTo(map);
-      });
-    
+    }    
   </script>
   </body>
 </html>
