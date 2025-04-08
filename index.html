@@ -130,6 +130,7 @@
         console.error("locations is not a valid array:", locations);
       }
     }
+    window.onload = loadData;
     
     // 現在地ボタンの機能
     function locateUser() {
@@ -152,7 +153,8 @@
           console.error(error);
         }
       );
-    }    
+    }
+    
   </script>
   </body>
 </html>
