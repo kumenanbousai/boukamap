@@ -27,19 +27,19 @@ async function loadData() {
 
   // 🔥 火災用のカスタムアイコン
   const fireIcon = L.icon({
-    iconUrl: "../images/fire.png", // ← ここをカスタム画像のURLに変更
+    iconUrl: "/static/images/fire.png", // ← ここをカスタム画像のURLに変更
     iconSize: [32, 32], // アイコンのサイズ
     iconAnchor: [16, 32], // アンカーの位置
     popupAnchor: [0, -32] // ポップアップの位置調整
   });
   const waterTankIcon = L.icon({
-    iconUrl: "../images/water.png", // ← ここをカスタム画像のURLに変更
+    iconUrl: "/static/images/water.png", // ← ここをカスタム画像のURLに変更
     iconSize: [32, 32], // アイコンのサイズ
     iconAnchor: [16, 32], // アンカーの位置
     popupAnchor: [0, -32] // ポップアップの位置調整
   });
   const hydrantIcon = L.icon({
-    iconUrl: "../images/hydrant.png", // ← ここをカスタム画像のURLに変更
+    iconUrl: "/static/images/hydrant.png", // ← ここをカスタム画像のURLに変更
     iconSize: [32, 32], // アイコンのサイズ
     iconAnchor: [16, 32], // アンカーの位置
     popupAnchor: [0, -32] // ポップアップの位置調整
