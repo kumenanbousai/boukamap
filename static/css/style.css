@@ -1,0 +1,36 @@
+html,
+body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+.leaflet-container {
+  width: 100vw;
+  height: 100vh;
+}
+
+.credit {
+  position: absolute;
+  bottom: 5px;
+  right: 10px;
+  background: rgba(255, 255, 255, 0.8);
+  padding: 5px;
+  font-size: 12px;
+  border-radius: 5px;
+  z-index: 1000;
+}
+
+/* 現在地ボタンのスタイル */
+.locate-btn {
+  position: absolute;
+  top: 10px;
+  left: 50px;
+  background: white;
+  border: 2px solid #ccc;
+  padding: 8px 12px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 14px;
+  z-index: 1000;
+}
